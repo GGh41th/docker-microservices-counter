@@ -1,0 +1,24 @@
+# LaTeX et artefacts de compilation
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.tex
+*.pdf
+
+# Dossier d'images et captures
+image/
+
+# Variables d'environnement locales contenant des secrets
+.env
+
+# Binaires et dépendances
+counter-app
+*.exe
+__pycache__/
+*.pyc
+.vscode/
+.idea/
