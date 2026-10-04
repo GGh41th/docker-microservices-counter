@@ -1,0 +1,42 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]   # tests only, never publishes
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go vet ./...
+      - run: go test -v -race ./...
+
+  build-and-push:
+    needs: test                      # skipped if tests fail
+    if: github.event_name == 'push'  # only on commits to main
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ vars.DOCKERHUB_USERNAME }}/counter-app:latest
+            ${{ vars.DOCKERHUB_USERNAME }}/counter-app:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
